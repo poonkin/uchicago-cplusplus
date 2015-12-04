@@ -1,0 +1,12 @@
+Notes by lecture:
+
+Lecture 1 - Templates, Vectors, std::copy (use over memcpy)
+
+Lecture 2 - More on copy vs. memcpy (finally fleshing out optimized copy using is_trivially_copy_constructible and true_type false_type)
+	classes, visibility (pub, priv, prot), introduction to const (LOOK FOR IT, USE IT, GOOD TEST QUESTION), vtable pointer
+	virtual and nonvirtual
+
+Lecture 3 - initialization (C++ style) of object members, 
+
+
+

@@ -1,0 +1,21 @@
+HW3-4.txt
+
+Michael Blumenshine
+MPCS 51044
+Homework 3, Problem 4 (Extra Credit)
+Due: 29 January 2015
+
+To int const, or to const int, that is the question?
+
+I think "const int" is the better choice. It more directly correlates with
+its meaning in pointer form. When I write "const Type var," I want the Type
+to be immutable; I'm not even considering the memory address, as it is
+static. If I were to change this to a pointer, i.e. const * Type, or
+even with one line instantiating with const * Type var = new Type, I would expect
+it to have the same behavior as when written in the static form. In C++,
+however, const * Type is a pointer to constant data, while Type * const
+is a constant pointer, i.e. it cannot change its memory address, but the
+data can change. By writing Type const, I could be setting myself up
+for future confusion. Better to leave that ordering reserved for when
+it is used with pointers (Type * const) so that there is less possibility
+of confusion.

@@ -1,0 +1,334 @@
+Michael Blumenshine
+CSPP51044 Winter 2015 Final Exam
+
+1) f() is static while g() is virtual, thus f() is determined at compile-time while g() is determined at run-time.
+
+- Therefore, d->f() will print 
+D's f: ++i = 8
+- d->g() will print
+D's g
+- b->f() will print
+B's f: i++ = 8  (but it will be 9, it will simply print 8)
+- b->g() will print
+D's g           (as this is determined at runtime)
+
+
+/************************************************************************************************************************/
+
+2)	/* NOTE: while unnecessary, I've included std:: where possible; I perceive this redundancy won't matter here */
+
+#include <iostream>
+#include <mutex>	/* NOTE CHANGE HERE */
+#include <thread>	/* NOTE CHANGE HERE */
+using namespace std;
+
+std::mutex mu; // could also have used member of base class, static  /* NOTE CHANGE HERE */
+
+struct B {
+	B(int _i) : i(_i) {}
+	void f() 
+	{ 
+		std::lock_guard<std::mutex> guard(mu);
+		cout << "B's f: i++ = " << i++ << endl; 
+	}
+	virtual void g() 
+	{ 
+		std::lock_guard<std::mutex> guard(mu);		
+		cout << "B's g" << endl; 
+	}
+	int i;
+};
+
+struct D : public B {
+	D(int _i) : B(_i) {}
+	void f() 
+	{ 
+		std::lock_guard<std::mutex> guard(mu);
+		cout << "D's f: ++i = " << ++i << endl;
+	}
+	virtual void g() 
+	{ 
+		std::lock_guard<std::mutex> guard(mu);		
+		cout << "D's g" << endl; 
+	}
+};
+
+int main()
+{
+	D *d = new D(7);
+	B *b = d;
+
+	std::thread t1((d->f));
+	std::thread t2((d->g));
+	std::thread t3((b->f));
+	std::thread t4((b->g));
+
+	t1.join();
+	t2.join();
+	t3.join();
+	t4.join();
+
+	return 0;
+}
+
+/*************************************************************************************************************************/
+
+3)
+
+template <typename T>
+struct ArithmeticPair {
+	AritmeticPair(T l, T r) : left(l), right(r) {}
+	T sum() { return left + right; }
+	T difference() { return left - right; }
+	T product() { return left * right; }
+	T quotient() { return left / right; }
+
+	T left;
+	T right;
+};
+
+/**************************************************************************************************************************/
+
+4)
+
+-- rewrite processOrders to use for_each and a lambda (CHECK THIS AGAIN)
+
+size_t processOrders(vector<Order> const &orders, DataBaseConnection &db)
+{
+	size_t ordersProcessed = 0;
+	db.ensureOpen();
+	for_each(orders.begin(), orders.end(), [&db, &ordersProcessed](Order o) { 
+			if (o.process()) { ordersProcessed++; db.updateOrderStatus(o); } 
+		});
+	return ordersProcessed;
+}
+
+-- rewrite processOrders to use for_each and a functor
+
+struct orderProcessor {
+	orderProcessor() { numOrders = 0; }
+    	void operator()(Order o, DataBaseConnection &db) {
+		if (o.process()) { numOrders++; db.updateOrderStatus(o); }
+	}
+	size_t numOrders;
+};
+
+size_t processOrders(vector<Order> const &orders, DataBaseConnection &db)
+{
+	orderProcessor proc;	
+	size_t ordersProcessed = 0;
+	db.ensureOpen();
+	for_each(orders.begin(), orders.end(), ref(proc));
+	return ordersProcessed;
+
+}
+
+
+-- rewrite processOrders to use a ranged for loop
+
+size_t processOrders(vector<Order> const &orders, DataBaseConnection &db)
+{
+	size_t ordersProcessed = 0;
+	db.ensureOpen();
+	for (auto i : orders)
+	{
+		if(i.process()) {
+			ordersProcessed++;
+			db.updateOrderStatus(i);
+		}
+	}
+	return ordersProcessed;
+}
+
+/*************************************************************************************************************************/
+
+5)
+
+List of problems (followed by modified code) FOR THE HEADER FILE:
+1. Should include an include guard, or at least #pragma once.
+2. Should put the header file in a namespace
+3. Shouldn't use a C library file, (math.h) but instead should use C++ file (cmath).
+4. Should NOT use using namespace std in a header file, as all other code will not be using namespace std (may not be desired).
+5. ECP inherits from Point, it doesn't need to declare double x and double y.
+6. If everything will be public in ECP, might as well make it a struct and utilize the default public visibility.
+6b. Could also go full-OOP style 
+7. RULE OF FIVE, as ECP has a copy constructor, it might want to include also a move constructor, move assignment operator, copy assignment
+	operator, destructor, although........
+8. Default copy constructor will suffice and thus writing the custom copy constructor was unnecessary. In fact, all the defaults
+	should accomplish what the creator of this class intended. Therefore, there is no need for the constructor.
+9. What is that macro doing? I would imagine it should be included in the ECP class, or something, and also not be in the middle of the code. 
+	I will keep it global, but using a constant int (int const) would be more appropriate, and putting it near the beginning of the file.
+	It is also unused, which may be an issue...
+10. operator== should be a const member function, as it does not modify members of the class. It is also very short, so added it
+11. operator== should be a member function. We don't want to be testing the equality of something that could be converted.
+	 In fact, almost all should be, with the exception of...
+12. operator+ should not be a member function for (perhaps yet-to-be-created) type conversions. 
+	ALSO, THERE WAS A VERY BAD ERROR IN WHICH THE ORIGINAL FUNCTION	WAS RETURNING A REFERENCE TO THE LOCALLY CREATED RESULT. 
+	Should just return result by value in a non-member function.
+13. Might want to consider a += operator, but I omitted the implementation of that. Wasn't sure if that was desired or not. Can always solve 	the problem with consistent use of the + operator
+14. Can put const after Point instead of before (also in the ECP copy constructor), and also in the operator== function, also in the validate function.
+15. *****Important, perhaps what you want: Not sure if this is going to be built on in a way that would require a separate class
+	for a validator, but it is very unlikely that this needs to be a separate class. Instead, it may be more suitable to simply
+	include the validate function as a member function of an ECP. It may also be useful to turn it into a functor, although personally
+	I think that making it a member of the ECP class is the best solution ***************
+16. *****Likewise, validate should just be a virtual function that is a member of both Point and ECP.
+
+// elliptic.h
+#ifndef ELLIPTIC_H	// Fix
+#define ELLIPTIC_H
+
+#include <cmath> // Fix
+#include <iostream>
+// using namespace std; // Commented out, fix
+
+namespace mpcs51044 {		// perhaps a more suitable name exists, just chose this for kicks
+
+	int const degree_of_elliptical_curve = 3;	// Fix, also relocation fix
+
+	struct Point {
+		Point(double X, double Y) : x(X), y(Y) {}
+		double length() const { return sqrt(x*x + y*y); }	// Consider compile-time solution	
+		virtual bool validate() const { return true; }
+		double x;
+		double y;	
+	};
+
+	// class ECP : public Point {
+	struct ECP : public Point {
+	// public:
+		ECP(double X, double Y) : Point(X, Y) {}
+		// ECP(ECP const &b) : Point(b.x, b.y) {}  // The default copy constructor will do just this, don't need rule of five
+		// ECP &operator+(ECP &b);				// Shouldn't have member addition at all, except maybe +=
+		bool operator==(ECP const &b) const { return this->x == b.x && this->y == b.y; } 
+		// double x;
+		// double y;
+
+		virtual bool validate() const { return return this->y*this->y == this->x*this->x*this->x - 5*this->x + 8;
+	};
+
+	// #define degree_of_elliptic_curve 3
+
+	/*
+	bool
+	operator==(ECP &a, ECP &b)
+	{
+		return a.x == b.x && a.y == b.y;
+	}
+	*/
+
+	ECP operator+(ECP const &a, ECP const &b)
+	{
+		ECP result(0,0);
+		// ECP &a(*this); // no need for this
+		double lambda;
+		if (a == b) {
+			lambda = (3*a.x*a.x-5/(2*a.y);	// warning: was 3 supposed to be degree_of_elliptic_curve ?
+		} else {
+			lambda = (b.y - a.y)/(b.x - a.x);
+		}	
+		result.x = lambda*lambda - a.x - b.x;
+		result.y = -pow(lambda, 3) + 2*lambda*a.x + lambda*b.x - a.y;	// was 3 supposed to be degree_of_etc.?
+		return result;
+	}
+
+	template<class CharT, class Traits>
+	basic_ostream<CharT, Traits> &
+	operator<<(basic_ostream<CharT, Traits> &os, Point const &p)
+	{
+		os << "(" << p.x << ", " << p.y << ")";
+		return os;
+	}
+	
+	// THIS CLASS MAY BE UNNECESSARY, SEE (15) above!!!!!
+	// class EllipticCurvePointValidator {
+ /*
+	struct EllipticCurvePointValidator {
+		// public:
+		bool validate(ECP const &a) {		// Again, this function should probably just be a member of ECP
+			// Check that this is a valid elliptic curve point			
+			return a.y*a.y == a.x*a.x*a.x - 5*a.x + 8;
+		}
+	};
+*/
+
+/* 	struct PointValidator : public EllipticCurvePointValidator{
+		// public:
+		// All points are points.
+		bool validate(Point &p) {
+			return true;
+		}
+	};
+*/	
+}// end namespace
+
+#endif
+
+/*************************************************************************************************************************/
+
+List of problems (followed by modified code) for the cpp file:
+
+1. As namespace is now used, will need to use using namespace mpcs51044
+2. Should be using RAII and not raw Point pointers! Don't even need "new", can use make_unique, etc.
+3. The first for loop is a mess. I advise against using doubles in for
+	loops as a best practice, but also new Point(d, d++) is undefined behavior! 
+4. Accumulator should beware of implicit conversion (should use 0.0).
+5. double d2 needs to be intialized! Otherwise garbage values!
+6. Modified the code for invalidECP to now just call a member function with no arguments.
+7. Program now returns EXIT_SUCCESS for maximum portability (likely unnecessary)
+
+// elliptic.cpp
+#include "elliptic.h"
+#include <vector>
+#include <numeric>
+#include <memory>	// for unique_ptr magic
+#include <cstdlib>	// for EXIT_SUCCESS
+using namespace std;
+using namespace mpcs51044; // FIX
+
+// for accumulate below
+double
+addLength(double acc, const Point *p)
+{
+	return acc + p->length();
+}
+
+int
+main()
+{
+	// Work with regular points for a bit
+	vector<unique_ptr<Point>> points;
+	for (int i = 0; i < 10; ++i)
+	{
+		points.push_back(make_unique<Point>(i+0.5, i+1.5)); // lots of changes here
+	}
+
+	// Get the sum of the lengths of the points
+	cout << "Sum of lengths : "
+	<< accumulate(points.begin(), points.end(), 0.0, addLength) << endl;	// fixes here
+
+	// copy to a new vector of points
+	vector<unique_ptr<Point>> new_points;
+	copy(points.begin(), points.end(), back_inserter(new_points));
+
+	// This point is an elliptic curve point
+	ECP ecp(1,2);
+	double d2 = 0; 			// initialize d2 as it is used later, also double d2{};
+	cout << ecp + ecp;
+	ECP ecp2 = ecp;
+	ecp2.y = d2;
+	cout << ecp2 + ecp << endl;
+	// This point is not on the elliptic curve
+	ECP invalidECP(0,0);
+	if(invalidECP.validate()) {		// no longer a need for these classes, just use member function
+		cout << "valid" << endl;
+	} else {
+		cout << "invalid" << endl;
+	}
+
+	return EXIT_SUCCESS;	// added for maximum portability
+
+}
+
+
+
+

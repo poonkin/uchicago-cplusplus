@@ -1,0 +1,23 @@
+Michael Blumenshine
+Hw 1.5
+MPCS 51044
+Due: January 15, 2015
+
+Why is C++ called C++ and not ++C?
+
+As the professor mentioned, there is no correct answer to this question.
+
+Below are my ideas, which are largely informed by my knowledge of the
+most common usage of the operator.
+
+The prefix operator changes something before it is used, completely
+voiding the previous state of the variable before it can be saved
+or assigned or even have influence over anything else in the program.
+In one line, with just one discrete step of the program, the old state
+is lost forever. If I were to take C and prefix increment the language, it would be one part disrespectful and one part damning. It would be an overwhelming declaration of the language's uselessness and replacement by the new C with Classes. I don't think Stroustrup intended to replace C. I think he intended to keep the original C (to return it after the increment operation) as it still had its place, but ultimately to modernize its core features into a more general-purpose language. In this way, the uses of C could be retained, even if they were increasingly replaced by the features of C++.
+
+It could also be a way of saying that the language is not yet complete.
+Again, less finality; C could still be assigned or used or whatever.
+
+It could also just sound better. Marketing is pretty important, after all!
+

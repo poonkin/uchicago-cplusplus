@@ -1,0 +1,40 @@
+HW4-1.txt
+
+Michael Blumenshine
+Homework 4, problem 1
+MPCS 51044 C++
+Due: 5 February 2015
+
+Regular credit:
+
+This code is not necessarily correct. It is possible that the call
+to function g() or h() will result in an exception being thrown which neither of the functions
+will catch. In this event, it will run through the entire program
+stack searching for a catch. In the event that none is found,
+cout.flush() will not be called. Therefore, it is not guaranteed
+that cout will be flushed.
+
+This can be solved by using catch (...) to catch any possible exception,
+or better yet, by determining what exceptions g() or h() can throw and then
+catching possible exceptions (or having g() or h() catch them). Fixed code below:
+
+int f() {
+	cout << "Some text";
+	try {
+		g(); 
+		cout << h();
+	}
+	catch (...) {}
+	cout.flush();
+	return 0;
+}
+
+Extra credit:
+
+Whereas the issue in the above problem arises if an exception is thrown, the
+only solution to the extra credit, besides killing the process or overflowing
+the stack, is the event that an exception is thrown. If the only line changed
+is that cout << h(); now reads cout << f();, we know that this line will not
+lead to an exception in any way, as f() throws no exceptions. If g() throws
+an exception, however, the stack will rewind and the program's execution
+will end.

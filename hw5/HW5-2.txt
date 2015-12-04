@@ -1,0 +1,22 @@
+HW5-2.txt
+
+Michael Blumenshine
+Homework 5 Problem 2
+Time Results
+
+All times were comparable, but after a few tests,
+it seems that specialization runs the best on average.
+Even so, the times for overloading and specialization 
+were remarkably close, and while specialization
+had the best average time, I did notice one 
+particular instance that had a time of as 
+slow as 20 seconds! While it may just have been OS 
+noise or some other unrelated factor, it was a bit odd.
+
+The better timing is probably due to the compile-time nature of
+working with templates. It reveals the overall power of
+templates and generic programming, not only for its
+flexibility and expressiveness but also for its performance
+power.
+
+Please see the header files for PSMatrix and OverloadMatrix for the relevant code.

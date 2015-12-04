@@ -1,0 +1,27 @@
+Notes by lecture:
+
+Lecture 1 - Templates, Vectors, std::copy (use over memcpy)
+
+Lecture 2 - More on copy vs. memcpy (finally fleshing out optimized copy using is_trivially_copy_constructible and true_type false_type)
+	classes, visibility (pub, priv, prot), introduction to const (LOOK FOR IT, USE IT, GOOD TEST QUESTION), vtable pointer
+	virtual and nonvirtual
+
+Lecture 3 - initialization (C++ style) of object members, forcing initialization of cout and static constructor
+
+Lecture 4 - static variable initialized exactly once, even if from many
+	threads, singleton, exceptions, RAII and exceptions, create unique pointers and release when passing function!!!!!!!!
+function overloading tricks! accumulate, template resolution
+
+Lecture 5 - initializer list, operator overloading, ostream and endl overloading, specializing templates oooh
+
+Lecture 6 - static assertions, SO MUCH STL (iterators too), creating iterators by inheriting
+
+Lecture 7 - lambdas, lambda return values, capture lists, for_each and lambdas, polymorphic lamdas using auto [&](auto x) { total += x; }
+C++ threads, locks, BE CAREFUL PASSING POINTERS OR REFERECES TO THREADS, async and futures
+
+Lecture 8 - std::lock, atomics, DELEGATING COPY CONSTRUCTOR, REVIEW IT
+
+Lecture 9 - exception types, tuples, function pointers, working with time, durations, time_point
+
+
+

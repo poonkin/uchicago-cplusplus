@@ -1,0 +1,1 @@
+void f2(std::unique_ptr<A>);

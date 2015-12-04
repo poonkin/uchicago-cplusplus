@@ -1,0 +1,37 @@
+HW4-2.txt
+
+Michael Blumenshine
+Homework 4, problem 2
+MPCS 51044 C++
+Due: 5 February 2015
+
+There are two glaring problems with this code.
+
+First, int i is static. Its life is the duration
+of the main function, in which case it is automatically
+removed from the stack as the stack unwinds.
+It is not a pointer and its data is not located on the heap;
+the semantics of the language and the stack itself determine
+how to deallocate the stack and C++ does not give the
+programmer control over this. So while &i does give us the
+address, again it is an address on the stack and will
+inevitably lead to the following error:
+*** Error in `./<program name>': free(): invalid pointer: <memory address> ***
+
+The other delete will cause a memory leak. 
+This is because an individual pointer is an address to a particular object
+in the array in the heap. Using the name ip is equivalent to saying ip[0].
+It returns the first of type int in that array in the heap.
+Therefore, calling delete ip only frees the first sizeof(int) bytes
+of that array structure. Calling delete [] ip will properly accompish the
+task of freeing all 10 objects allocated previously.
+
+The correct code is found below:
+
+int main()
+{
+	int i;
+	int *ip = new int[10];
+	
+	delete [] ip;
+}

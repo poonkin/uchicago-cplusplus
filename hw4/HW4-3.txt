@@ -1,0 +1,40 @@
+HW4-3.txt
+
+Michael Blumenshine
+Homework 4, problem 3
+MPCS 51044 C++
+Due: 5 February 2015
+
+The problem with the use of the for_each and this functor
+is that for_each takes the functor and its members by value.
+This means that any updates that the functor does in the for_each
+loop will be lost. Our original functor object, maxf, will
+continue to use its initialized member value (which was initialized
+to 0) and thus it keeps returning 0.
+
+For a similar feel and proper behavior, I used a range-based for loop.
+for (auto elt : names) { maxf(elt);	}
+
+Full code below:
+
+#include <algorithm>
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+struct maxlenftn {
+	maxlenftn() { maxlen = 0; }
+	void operator()(string s) {
+		maxlen = max(maxlen,s.size());
+	}
+	string::size_type maxlen;
+};
+
+int main() {
+	vector<string> names{"Spertus", "Lemon", "Golden", "Melhus"};
+	maxlenftn maxf;
+	for (auto elt : names) { maxf(elt);	}
+	cout << maxf.maxlen << endl;
+	return 0;
+}

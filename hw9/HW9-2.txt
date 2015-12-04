@@ -1,0 +1,17 @@
+HW9-2.txt
+
+Michael Blumenshine
+HW 9.2
+MPCS 51044
+12 March 2015
+
+The signature should use a unique_ptr or some kind of smart pointer:
+
+void f2(unique_ptr<A>);
+
+A thread could release a smart pointer back to a caller that has already
+run out of scope when threading is used. This would have the effect of 
+a memory leak. It can also happen when release is called after an object
+is allocated to a unique pointer from within the same function. There is
+no caller.
+
